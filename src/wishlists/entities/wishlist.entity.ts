@@ -5,10 +5,11 @@ import {
   OneToMany,
   ManyToOne,
   CreateDateColumn,
+  ManyToMany,
 } from 'typeorm';
 import { Length, IsUrl, IsDate, IsOptional } from 'class-validator';
-import { User } from '../users/user.entity';
-import { Wish } from '../wishes/wish.entity';
+import { User } from '../../users/entities/user.entity';
+import { Wish } from '../../wishes/entities/wish.entity';
 
 @Entity()
 export class Wishlist {
@@ -42,7 +43,7 @@ export class Wishlist {
   @IsUrl()
   image: string;
 
-  @OneToMany(() => Wish, (wish) => wish.wishlist)
+  @ManyToMany(() => Wish, (wish) => wish.wishlist)
   items: Wish[];
 
   @ManyToOne(() => User, (user) => user.offers)

@@ -1,10 +1,16 @@
-import { Injectable } from '@nestjs/common';
+import {
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Wishlist } from './wishlist.entity';
+import { Wishlist } from './entities/wishlist.entity';
 import { CreateWishlistDto } from './dto/create-wishlist-dto';
-import { UsersService } from 'src/users/users.service';
-import { WishesService } from 'src/wishes/wishes-service';
+import { UsersService } from '../users/users.service';
+import { WishesService } from '../wishes/wishes-service';
+import { ExceptionMessage } from '../consts/exception-message';
+import { UpdateWishlistDto } from './dto/update-wishlist-dto';
 
 @Injectable()
 export class WishlistService {
@@ -33,7 +39,7 @@ export class WishlistService {
     createWishlistDto: CreateWishlistDto,
   ): Promise<Wishlist> {
     const { itemsId, ...otherParams } = createWishlistDto;
-    const user = await this.userService.findOne(userId);
+    const user = await this.userService.findUserWithPassword({ id: userId });
     const wishes = await this.wishesService.findAllByIdIn(itemsId);
     const params = {
       ...otherParams,
@@ -43,13 +49,26 @@ export class WishlistService {
     return this.wishlistRepository.save(params);
   }
 
-  async update(id: number, updateWishlist: Wishlist) {
-    return this.wishlistRepository.update({ id }, updateWishlist);
+  async update(id: number, updateWishlist: UpdateWishlistDto, userId: number) {
+    const wishlist = await this.findOne(id);
+    if (!wishlist) {
+      throw new NotFoundException(ExceptionMessage.WISHLIST_NOT_FOUND);
+    } else if (userId === wishlist.owner.id) {
+      return this.wishlistRepository.update({ id }, updateWishlist);
+    } else {
+      throw new ForbiddenException(ExceptionMessage.WISHLIST_UPDATE_FORBIDDEN);
+    }
   }
 
-  async remove(id: number): Promise<Wishlist> {
-    const wish = await this.findOne(id);
-    await this.wishlistRepository.delete({ id });
-    return wish;
+  async remove(id: number, userId: number): Promise<Wishlist> {
+    const wishlist = await this.findOne(id);
+    if (!wishlist) {
+      throw new NotFoundException(ExceptionMessage.WISHLIST_NOT_FOUND);
+    } else if (userId === wishlist.owner.id) {
+      await this.wishlistRepository.remove(wishlist);
+      return wishlist;
+    } else {
+      throw new ForbiddenException(ExceptionMessage.WISH_DELETE_FORBIDDEN);
+    }
   }
 }

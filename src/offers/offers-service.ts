@@ -1,10 +1,15 @@
-import { Injectable } from '@nestjs/common';
+import {
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Offer } from './offer.entity';
+import { Offer } from './entities/offer.entity';
 import { CreateOfferDto } from './dto/create-offer-dto';
-import { UsersService } from 'src/users/users.service';
-import { WishesService } from 'src/wishes/wishes-service';
+import { UsersService } from '../users/users.service';
+import { WishesService } from '../wishes/wishes-service';
+import { ExceptionMessage } from '../consts/exception-message';
 
 @Injectable()
 export class OffersService {
@@ -16,19 +21,26 @@ export class OffersService {
   ) {}
 
   async create(userId: number, createOfferDto: CreateOfferDto): Promise<Offer> {
-    const { itemId, ...otherParams } = createOfferDto;
-    const user = await this.userService.findOne(userId);
-    const wish = await this.wishesService.updateRaised(
-      itemId,
-      createOfferDto.amount,
-    );
+    const wish = await this.wishesService.findOne(createOfferDto.itemId);
+    if (!wish) {
+      throw new NotFoundException(ExceptionMessage.WISH_NOT_FOUND);
+    } else if (userId !== wish.owner.id) {
+      const { itemId, ...otherParams } = createOfferDto;
+      const user = await this.userService.findUserWithPassword({ id: userId });
+      const wish = await this.wishesService.updateRaised(
+        itemId,
+        createOfferDto.amount,
+      );
 
-    const params = {
-      ...otherParams,
-      user,
-      item: wish,
-    };
-    return this.offersRepository.save(params);
+      const params = {
+        ...otherParams,
+        user,
+        item: wish,
+      };
+      return this.offersRepository.save(params);
+    } else {
+      throw new ForbiddenException(ExceptionMessage.OFFER_CREATE_FORBIDDEN);
+    }
   }
 
   async findAll(): Promise<Offer[]> {

@@ -6,8 +6,8 @@ import {
   CreateDateColumn,
 } from 'typeorm';
 import { IsBoolean, IsNumber, IsDate } from 'class-validator';
-import { User } from '../users/user.entity';
-import { Wish } from '../wishes/wish.entity';
+import { User } from '../../users/entities/user.entity';
+import { Wish } from '../../wishes/entities/wish.entity';
 
 @Entity()
 export class Offer {

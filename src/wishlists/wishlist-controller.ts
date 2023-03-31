@@ -7,11 +7,9 @@ import {
   Patch,
   Delete,
   UseGuards,
-  NotFoundException,
   Req,
-  ForbiddenException,
 } from '@nestjs/common';
-import { Wishlist } from './wishlist.entity';
+import { Wishlist } from './entities/wishlist.entity';
 import { WishlistService } from './wishlist-service';
 import { CreateWishlistDto } from './dto/create-wishlist-dto';
 import { UpdateWishlistDto } from './dto/update-wishlist-dto';
@@ -50,30 +48,13 @@ export class WishlistsController {
     @Body() updateWishlistDto: UpdateWishlistDto,
   ) {
     const userId = req.user.id;
-    const wishlist = await this.wishlistService.findOne(id);
-    if (!wishlist) {
-      throw new NotFoundException();
-    } else if (userId === wishlist.owner.id) {
-      return this.wishlistService.update(id, {
-        ...wishlist,
-        ...updateWishlistDto,
-      });
-    } else {
-      throw new ForbiddenException();
-    }
+    return this.wishlistService.update(id, updateWishlistDto, userId);
   }
 
   @Delete(':id')
   @UseGuards(JwtGuard)
   async removeOne(@Req() req, @Param('id') id: number): Promise<Wishlist> {
     const userId = req.user.id;
-    const wishlist = await this.wishlistService.findOne(id);
-    if (!wishlist) {
-      throw new NotFoundException();
-    } else if (userId === wishlist.owner.id) {
-      return this.wishlistService.remove(id);
-    } else {
-      throw new ForbiddenException();
-    }
+    return this.wishlistService.remove(id, userId);
   }
 }

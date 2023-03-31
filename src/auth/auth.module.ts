@@ -19,6 +19,7 @@ import { HashModule } from 'src/hash/hash.module';
       imports: [ConfigModule],
       useFactory: async () => ({
         secret: process.env.JWT_SECRET || 'some-secret-key',
+        signOptions: { expiresIn: '1d' },
       }),
       inject: [ConfigService],
     }),

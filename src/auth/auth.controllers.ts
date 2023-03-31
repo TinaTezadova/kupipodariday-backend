@@ -14,13 +14,13 @@ export class AuthController {
   @UseGuards(AuthGuard('local'))
   @Post('signin')
   signin(@Req() req) {
-    return this.authService.auth(req.user);
+    return this.authService.auth(req.user.id);
   }
 
   @Post('signup')
   async signup(@Body() createUserDto: CreateUserDto) {
     const user = await this.usersService.create(createUserDto);
 
-    return this.authService.auth(user);
+    return this.authService.auth(user.id);
   }
 }
