@@ -6,9 +6,9 @@ import {
   CreateDateColumn,
 } from 'typeorm';
 import { Min, Max, IsUrl, IsDate, IsEmail } from 'class-validator';
-import { Wish } from '../wishes/wish.entity';
-import { Offer } from '../offers/offer.entity';
-import { Wishlist } from '../wishlists/wishlist.entity';
+import { Wish } from '../../wishes/entities/wish.entity';
+import { Offer } from '../../offers/entities/offer.entity';
+import { Wishlist } from '../../wishlists/entities/wishlist.entity';
 
 @Entity()
 export class User {
@@ -29,7 +29,7 @@ export class User {
   @IsDate()
   updatedAt: Date;
 
-  @Column({ nullable: false })
+  @Column({ nullable: false, unique: true })
   @Min(2)
   @Max(30)
   username: string;
@@ -51,7 +51,7 @@ export class User {
   @IsEmail()
   email: string;
 
-  @Column()
+  @Column({ select: false })
   password: string;
 
   @OneToMany(() => Wish, (wish) => wish.owner)

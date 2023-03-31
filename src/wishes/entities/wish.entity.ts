@@ -5,11 +5,13 @@ import {
   ManyToOne,
   OneToMany,
   CreateDateColumn,
+  ManyToMany,
+  JoinTable,
 } from 'typeorm';
 import { Min, Max, IsUrl, IsDate, IsNumber } from 'class-validator';
-import { User } from '../users/user.entity';
-import { Offer } from '../offers/offer.entity';
-import { Wishlist } from 'src/wishlists/wishlist.entity';
+import { User } from '../../users/entities/user.entity';
+import { Offer } from '../../offers/entities/offer.entity';
+import { Wishlist } from 'src/wishlists/entities/wishlist.entity';
 
 @Entity()
 export class Wish {
@@ -54,7 +56,8 @@ export class Wish {
   @ManyToOne(() => User, (user) => user.wishes)
   owner: User;
 
-  @ManyToOne(() => Wishlist, (wishlist) => wishlist.items)
+  @ManyToMany(() => Wishlist, (wishlist) => wishlist.items)
+  @JoinTable()
   wishlist: Wishlist;
 
   @Column()

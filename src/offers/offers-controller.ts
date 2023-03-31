@@ -11,7 +11,7 @@ import {
 } from '@nestjs/common';
 import { CreateOfferDto } from './dto/create-offer-dto';
 import { OffersService } from './offers-service';
-import { Offer } from './offer.entity';
+import { Offer } from './entities/offer.entity';
 import { JwtGuard } from 'src/auth/jwt.guard';
 import { WishesService } from 'src/wishes/wishes-service';
 
@@ -29,14 +29,7 @@ export class OffersController {
     @Body() createOfferDto: CreateOfferDto,
   ): Promise<Offer> {
     const userId = req.user.id;
-    const wish = await this.wishesService.findOne(createOfferDto.itemId);
-    if (!wish) {
-      throw new NotFoundException();
-    } else if (userId !== wish.owner.id) {
-      return this.offersService.create(req.user.id, createOfferDto);
-    } else {
-      throw new ForbiddenException();
-    }
+    return this.offersService.create(userId, createOfferDto);
   }
 
   @UseGuards(JwtGuard)
