@@ -58,7 +58,7 @@ export class UsersService {
 
       await this.userRepository.update(id, params);
 
-      return this.findUserWithPassword({ id });
+      return this.findOne(id);
     }
   }
 
