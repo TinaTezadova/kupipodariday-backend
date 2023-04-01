@@ -66,8 +66,8 @@ export class WishesService {
     });
   }
 
-  async update(id: number, updatedWish: Wish) {
-    return this.wishesRepository.update({ id }, updatedWish);
+  async update(updatedWish: Wish) {
+    return this.wishesRepository.save(updatedWish);
   }
 
   async updateWish(id: number, updateWishDto: UpdateWishDto, userId: number) {
@@ -77,14 +77,14 @@ export class WishesService {
     } else if (userId === wish.owner.id) {
       if (updateWishDto.price !== wish.price) {
         if (!wish.offers?.length) {
-          return this.update(id, { ...wish, ...updateWishDto });
+          return this.update({ ...wish, ...updateWishDto });
         } else {
           throw new BadRequestException(
             ExceptionMessage.WISH_PRICE_UPDATE_FORBIDDEN,
           );
         }
       } else {
-        return this.update(id, { ...wish, ...updateWishDto });
+        return this.update({ ...wish, ...updateWishDto });
       }
     } else {
       throw new ForbiddenException(ExceptionMessage.WISH_UPDATE_FORBIDDEN);
@@ -99,7 +99,7 @@ export class WishesService {
         ...wish,
         raised: newRaised,
       };
-      await this.update(wishId, newParams);
+      await this.update(newParams);
       return this.findOne(wishId);
     } else {
       throw new BadRequestException(

@@ -50,11 +50,17 @@ export class WishlistService {
   }
 
   async update(id: number, updateWishlist: UpdateWishlistDto, userId: number) {
+    const { itemsId, ...otherParams } = updateWishlist;
     const wishlist = await this.findOne(id);
+    const wishes = await this.wishesService.findAllByIdIn(itemsId);
     if (!wishlist) {
       throw new NotFoundException(ExceptionMessage.WISHLIST_NOT_FOUND);
     } else if (userId === wishlist.owner.id) {
-      return this.wishlistRepository.update({ id }, updateWishlist);
+      return this.wishlistRepository.save({
+        ...wishlist,
+        ...otherParams,
+        items: wishes,
+      });
     } else {
       throw new ForbiddenException(ExceptionMessage.WISHLIST_UPDATE_FORBIDDEN);
     }
