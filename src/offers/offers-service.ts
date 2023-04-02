@@ -37,7 +37,9 @@ export class OffersService {
         user,
         item: wish,
       };
-      return this.offersRepository.save(params);
+      const newOffer = await this.offersRepository.save(params);
+      delete newOffer.user.password;
+      return newOffer;
     } else {
       throw new ForbiddenException(ExceptionMessage.OFFER_CREATE_FORBIDDEN);
     }

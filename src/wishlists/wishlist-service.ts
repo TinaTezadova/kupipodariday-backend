@@ -46,7 +46,9 @@ export class WishlistService {
       owner: user,
       items: wishes,
     } as unknown as Wishlist;
-    return this.wishlistRepository.save(params);
+    const newWishlist = await this.wishlistRepository.save(params);
+    delete newWishlist.owner.password;
+    return newWishlist;
   }
 
   async update(id: number, updateWishlist: UpdateWishlistDto, userId: number) {
