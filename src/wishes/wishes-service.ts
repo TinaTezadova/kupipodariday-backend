@@ -26,7 +26,9 @@ export class WishesService {
       ...wish,
       owner: user,
     };
-    return this.wishesRepository.save(params);
+    const newWish = await this.wishesRepository.save(params);
+    delete newWish.owner.password;
+    return newWish;
   }
 
   async findOne(id: number): Promise<Wish> {
